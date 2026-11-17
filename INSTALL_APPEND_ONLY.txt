@@ -1,0 +1,18 @@
+FILES TO ADD (copy into existing Laravel project preserving paths):
+- app/Models/PropertyVerification.php
+- app/Http/Controllers/Api/V1/Property/PropertyWorkflowController.php
+- app/Http/Requests/Property/SubmitPropertyForVerificationRequest.php
+- app/Http/Requests/Property/ReviewPropertyVerificationRequest.php
+- app/Http/Requests/Property/ApprovePropertyRequest.php
+- app/Http/Resources/PropertyVerificationResource.php
+- database/migrations/2026_11_20_000001_create_property_verifications_table.php
+- resources/js/api/propertyWorkflowApi.js
+- resources/js/stores/propertyWorkflow.js
+- resources/js/pages/PropertyWorkflowPage.vue
+
+MANUALLY MERGE (do not overwrite complete existing files):
+- app/Models/Property.php.append.txt -> app/Models/Property.php
+- routes/api.php.append.txt -> routes/api.php inside existing v1 + auth:sanctum group
+- resources/js/router/index.js.append.txt -> existing router routes array
+
+See README_STEP4.md for permissions, install commands, API payloads and test flow.

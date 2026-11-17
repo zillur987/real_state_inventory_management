@@ -6,9 +6,9 @@ import { Building2, Search, ShieldCheck, Users, LayoutDashboard } from 'lucide-v
  * `route: null` = not built yet (card shown as "coming soon").
  */
 export const modules = [
-    { key: 'inventory', title: 'Property Inventory', subtitle: 'Property registration and listing', icon: Building2, route: null },
+    { key: 'inventory', title: 'Property Inventory', subtitle: 'Property registration and listing', icon: Building2, route: 'properties.index' },
     { key: 'search', title: 'Smart Search', subtitle: 'Advanced filters and matching', icon: Search, route: null },
-    { key: 'verification', title: 'Verification', subtitle: 'Legal and document tracking', icon: ShieldCheck, route: null },
+    { key: 'verification', title: 'Verification', subtitle: 'Legal and document tracking', icon: ShieldCheck, route: 'properties.workflow' },
     { key: 'owners', title: 'Owner Management', subtitle: 'Restricted owner information', icon: Users, route: null },
 ];
 
@@ -17,5 +17,5 @@ export const managementModule = {
     title: 'Sales & Management Dashboard',
     subtitle: 'Availability · Pricing · Follow-ups · Reports · Performance',
     icon: LayoutDashboard,
-    route: null,
+    route: 'management.dashboard',
 };

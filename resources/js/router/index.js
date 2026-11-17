@@ -16,6 +16,46 @@ const router = createRouter({
             component: () => import('@/pages/HomePage.vue'),
             meta: { requiresAuth: true },
         },
+
+        {
+            path: '/properties',
+            name: 'properties.index',
+            component: () => import('@/pages/PropertyIndexPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/properties/create',
+            name: 'properties.create',
+            component: () => import('@/pages/PropertyCreatePage.vue'),
+            meta: { requiresAuth: true },
+        },
+
+        {
+            path: '/properties/:id',
+            name: 'properties.show',
+            component: () => import('@/pages/PropertyShowPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/properties/:id/edit',
+            name: 'properties.edit',
+            component: () => import('@/pages/PropertyEditPage.vue'),
+            meta: { requiresAuth: true },
+        },
+
+        {
+            path: '/property-workflow',
+            name: 'properties.workflow',
+            component: () => import('@/pages/PropertyWorkflowPage.vue'),
+            meta: { requiresAuth: true },
+        },
+
+        {
+            path: '/management-dashboard',
+            name: 'management.dashboard',
+            component: () => import('@/pages/ManagementDashboardPage.vue'),
+            meta: { requiresAuth: true },
+        },
         { path: '/:pathMatch(.*)*', redirect: { name: 'dashboard' } },
     ],
 });
