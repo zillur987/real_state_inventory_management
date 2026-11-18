@@ -1,4 +1,3 @@
-
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -14,7 +13,6 @@ const toast = useToast();
 const editing = computed(() => Boolean(route.params.owner));
 const saving = ref(false);
 const loading = ref(false);
-const submitted = ref(false);
 const errors = ref({});
 
 const form = reactive({
@@ -35,23 +33,14 @@ function fieldError(key) {
     return errors.value[key]?.[0] || '';
 }
 
-/**
- * Normalize common Laravel API Resource response structures.
- */
+/** Normalize common Laravel API Resource response structures. */
 function getOwnerData(response) {
     let data = response?.data ?? response;
-
-    // Handle nested Laravel resource response: { data: { data: {...} } }
-    if (data?.data) {
-        data = data.data;
-    }
-
+    if (data?.data) data = data.data;
     return data;
 }
 
-/**
- * Load existing owner information for edit.
- */
+/** Load existing owner information for edit. */
 async function loadOwner() {
     if (!editing.value) return;
 
@@ -72,10 +61,15 @@ async function loadOwner() {
             }
         });
 
-        // Normalize numeric fields for form inputs.
-        form.expected_price = owner.expected_price ?? '';
-        form.relationship_manager_id = owner.relationship_manager_id ?? '';
+        // Fallback: manager ID from the nested relation if the flat key is missing.
+        if (
+            (form.relationship_manager_id === '' || form.relationship_manager_id === null) &&
+            owner.relationship_manager?.id
+        ) {
+            form.relationship_manager_id = owner.relationship_manager.id;
+        }
 
+        form.expected_price = owner.expected_price ?? '';
     } catch (error) {
         console.error('Owner loading error:', error);
 
@@ -83,27 +77,21 @@ async function loadOwner() {
             general: [
                 error.response?.data?.message ||
                 error.message ||
-                'Unable to load owner information.'
-            ]
+                'Unable to load owner information.',
+            ],
         };
-
         toast.error(errors.value.general[0]);
     } finally {
         loading.value = false;
     }
 }
 
-onMounted(() => {
-    loadOwner();
-});
+onMounted(loadOwner);
 
-/**
- * Create or update owner.
- */
+/** Create or update owner. */
 async function submit() {
     if (saving.value || loading.value) return;
 
-    submitted.value = true;
     errors.value = {};
     saving.value = true;
 
@@ -111,30 +99,25 @@ async function submit() {
         const payload = {
             ...form,
             expected_price:
-                form.expected_price === '' ? null : Number(form.expected_price),
+                form.expected_price === '' || form.expected_price === null
+                    ? null
+                    : Number(form.expected_price),
             relationship_manager_id:
-                form.relationship_manager_id === ''
+                form.relationship_manager_id === '' || form.relationship_manager_id === null
                     ? null
                     : Number(form.relationship_manager_id),
         };
 
-        let response;
-
-        if (editing.value) {
-            response = await store.update(route.params.owner, payload);
-        } else {
-            response = await store.create(payload);
-        }
+        const response = editing.value
+            ? await store.update(route.params.owner, payload)
+            : await store.create(payload);
 
         const owner = getOwnerData(response);
 
         toast.success(
-            editing.value
-                ? 'Owner updated successfully!'
-                : 'Owner created successfully!'
+            editing.value ? 'Owner updated successfully!' : 'Owner created successfully!'
         );
 
-        // Use the current ID if the update response does not include one.
         const ownerId = owner?.id ?? route.params.owner;
 
         if (!ownerId) {
@@ -142,60 +125,82 @@ async function submit() {
             return;
         }
 
-        await router.push({
-            name: 'owners.show',
-            params: { owner: ownerId },
-        });
-
+        await router.push({ name: 'owners.show', params: { owner: ownerId } });
     } catch (error) {
         console.error('Owner saving error:', error);
 
         const response = error.response?.data;
 
         errors.value = response?.errors ?? {
-            general: [
-                response?.message || 'Unable to save owner information.'
-            ]
+            general: [response?.message || 'Unable to save owner information.'],
         };
 
-        if (response?.errors) {
-            Object.values(response.errors).forEach((messages) => {
-                (Array.isArray(messages) ? messages : [messages]).forEach(
-                    (message) => toast.error(message)
-                );
-            });
-        } else {
-            toast.error(errors.value.general[0]);
-        }
-
+        toast.error(
+            response?.errors
+                ? 'Please correct the highlighted fields.'
+                : errors.value.general[0]
+        );
     } finally {
         saving.value = false;
     }
 }
 </script>
 
-
 <template>
     <AppLayout>
         <main class="form-page">
             <div class="form-top">
-                <div><p class="eyebrow">OWNER DIRECTORY</p><h1>{{ editing ? 'Edit owner' : 'Register owner' }}</h1><p>Owner contact and relationship information is restricted to authorized personnel.</p></div>
-                <button class="btn-light" @click="router.back()">Back</button>
+                <div>
+                    <p class="eyebrow">OWNER DIRECTORY</p>
+                    <h1>{{ editing ? 'Edit owner' : 'Register owner' }}</h1>
+                    <p>Owner contact and relationship information is restricted to authorized personnel.</p>
+                </div>
+                <button type="button" class="btn-light" @click="router.back()">Back</button>
             </div>
 
-            <form class="form-card" @submit.prevent="submit">
+            <form class="form-card" novalidate @submit.prevent="submit">
                 <p v-if="errors.general" class="alert">{{ errors.general[0] }}</p>
+
                 <section>
                     <h2>Owner information</h2>
                     <p class="section-help">Register the owner details collected during property sourcing.</p>
                     <div class="grid">
-                        <label>Owner name <input v-model.trim="form.name" class="field" placeholder="Enter full owner name" required><small>{{ fieldError('name') }}</small></label>
-                        <label>Owner number <input v-model.trim="form.phone" class="field" placeholder="Enter phone number" required><small>{{ fieldError('phone') }}</small></label>
-                        <label>Email address <input v-model.trim="form.email" type="email" class="field" placeholder="name@example.com"><small>{{ fieldError('email') }}</small></label>
-                        <label>Owner profession <input v-model.trim="form.profession" class="field" placeholder="Enter profession"><small>{{ fieldError('profession') }}</small></label>
-                        <label>Owner type <select v-model="form.owner_type" class="field"><option value="individual">Individual</option><option value="joint">Joint</option><option value="company">Company</option></select><small>{{ fieldError('owner_type') }}</small></label>
-                        <label>Status <select v-model="form.status" class="field"><option value="active">Active</option><option value="inactive">Inactive</option><option value="blocked">Blocked</option></select><small>{{ fieldError('status') }}</small></label>
-                        <label class="full">Property address in detail <textarea v-model="form.detailed_address" class="field textarea" placeholder="Enter owner's/property's detailed address"></textarea><small>{{ fieldError('detailed_address') }}</small></label>
+                        <label>Owner name
+                            <input v-model.trim="form.name" class="field" placeholder="Enter full owner name">
+                            <small>{{ fieldError('name') }}</small>
+                        </label>
+                        <label>Owner number
+                            <input v-model.trim="form.phone" class="field" placeholder="Enter phone number">
+                            <small>{{ fieldError('phone') }}</small>
+                        </label>
+                        <label>Email address
+                            <input v-model.trim="form.email" type="email" class="field" placeholder="name@example.com">
+                            <small>{{ fieldError('email') }}</small>
+                        </label>
+                        <label>Owner profession
+                            <input v-model.trim="form.profession" class="field" placeholder="Enter profession">
+                            <small>{{ fieldError('profession') }}</small>
+                        </label>
+                        <label>Owner type
+                            <select v-model="form.owner_type" class="field">
+                                <option value="individual">Individual</option>
+                                <option value="joint">Joint</option>
+                                <option value="company">Company</option>
+                            </select>
+                            <small>{{ fieldError('owner_type') }}</small>
+                        </label>
+                        <label>Status
+                            <select v-model="form.status" class="field">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="blocked">Blocked</option>
+                            </select>
+                            <small>{{ fieldError('status') }}</small>
+                        </label>
+                        <label class="full">Property address in detail
+                            <textarea v-model="form.detailed_address" class="field textarea" placeholder="Enter owner's/property's detailed address"></textarea>
+                            <small>{{ fieldError('detailed_address') }}</small>
+                        </label>
                     </div>
                 </section>
 
@@ -203,18 +208,35 @@ async function submit() {
                     <h2>Restricted official information</h2>
                     <p class="section-help">Visible and editable only when the user's permissions allow it.</p>
                     <div class="grid">
-                        <label>Owner's expected price (BDT) <input v-model="form.expected_price" type="number" min="0" class="field" placeholder="Enter expected price"><small>{{ fieldError('expected_price') }}</small></label>
-                        <label>Assigned relationship manager (User ID) <input v-model="form.relationship_manager_id" type="number" min="1" class="field" placeholder="Enter manager user ID"><small>{{ fieldError('relationship_manager_id') }}</small></label>
-                        <label class="full">Legal status note <textarea v-model="form.legal_status_note" class="field textarea" placeholder="Record restricted legal/ownership notes"></textarea><small>{{ fieldError('legal_status_note') }}</small></label>
+                        <label>Owner's expected price (BDT)
+                            <input v-model="form.expected_price" type="number" min="0" class="field" placeholder="Enter expected price">
+                            <small>{{ fieldError('expected_price') }}</small>
+                        </label>
+                        <label>Assigned relationship manager (User ID)
+                            <input v-model="form.relationship_manager_id" type="number" min="1" class="field" placeholder="Enter manager user ID">
+                            <small>{{ fieldError('relationship_manager_id') }}</small>
+                        </label>
+                        <label class="full">Legal status note
+                            <textarea v-model="form.legal_status_note" class="field textarea" placeholder="Record restricted legal/ownership notes"></textarea>
+                            <small>{{ fieldError('legal_status_note') }}</small>
+                        </label>
                     </div>
                 </section>
 
                 <section>
                     <h2>Internal notes</h2>
-                    <label class="block">Internal remarks <textarea v-model="form.notes" class="field textarea" placeholder="Internal owner relationship notes"></textarea><small>{{ fieldError('notes') }}</small></label>
+                    <label class="block">Internal remarks
+                        <textarea v-model="form.notes" class="field textarea" placeholder="Internal owner relationship notes"></textarea>
+                        <small>{{ fieldError('notes') }}</small>
+                    </label>
                 </section>
 
-                <div class="form-actions"><button type="button" class="btn-light" @click="router.back()">Cancel</button><button class="btn-primary" type="submit" :disabled="saving">{{ saving ? 'Saving…' : editing ? 'Save changes' : 'Create owner' }}</button></div>
+                <div class="form-actions">
+                    <button type="button" class="btn-light" @click="router.back()">Cancel</button>
+                    <button class="btn-primary" type="submit" :disabled="saving || loading">
+                        {{ saving ? 'Saving…' : editing ? 'Save changes' : 'Create owner' }}
+                    </button>
+                </div>
             </form>
         </main>
     </AppLayout>

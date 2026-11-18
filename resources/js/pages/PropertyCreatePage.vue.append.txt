@@ -1,8 +1,0 @@
-// 1) Add to the existing reactive form object:
-is_owner_direct: false,
-
-// 2) Add this checkbox near the pricing / negotiable controls in the template:
-<label class="mt-4 inline-flex items-center gap-2 text-sm">
-    <input v-model="form.is_owner_direct" type="checkbox">
-    Owner-direct inventory
-</label>

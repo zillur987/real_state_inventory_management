@@ -98,5 +98,44 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('automation.duplicates', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
         Gate::define('automation.price-history', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
         Gate::define('automation.manage', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
+
+        // ---- Owner management abilities ----
+        Gate::define('owners.view', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(
+                UserRole::Admin, UserRole::Manager, UserRole::SalesAgent, UserRole::LegalOfficer
+            )
+        );
+
+        Gate::define('owners.create', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager)
+        );
+
+        Gate::define('owners.update', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager)
+        );
+
+        Gate::define('owners.delete', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin)
+        );
+
+        // Restricted fields: phone, email, profession, address, legal note, expected price, manager, notes
+        Gate::define('owners.view_contact', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(
+                UserRole::Admin, UserRole::Manager, UserRole::LegalOfficer
+            )
+        );
+
+        // Management only
+        Gate::define('owners.view_final_price', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager)
+        );
+
+        Gate::define('owners.request_contact', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::SalesAgent)
+        );
+
+        Gate::define('owners.review_contact_requests', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager)
+        );
     }
 }

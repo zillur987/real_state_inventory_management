@@ -76,6 +76,8 @@ final class PropertyWorkflowController extends Controller
         $this->authorizePermission($request, 'properties.workflow.submit');
         $latestVerification = $property->verifications()->where('stage', 'verification')->latest('id')->first();
         $latestApproval = $property->verifications()->where('stage', 'approval')->latest('id')->first();
+        $latestVerification = $this->latestRecord($property, 'verification');
+        $latestApproval = $this->latestRecord($property, 'approval');
         if ($latestApproval?->status === 'approved') {
             throw ValidationException::withMessages(['workflow' => 'An approved property cannot be submitted again.']);
         }
@@ -93,7 +95,7 @@ final class PropertyWorkflowController extends Controller
     public function review(ReviewPropertyVerificationRequest $request, Property $property): JsonResponse
     {
         $this->authorizePermission($request, 'properties.workflow.verify');
-        $latest = $property->verifications()->where('stage', 'verification')->latest('id')->first();
+        $latest = $this->latestRecord($property, 'verification');
         if (!$latest || $latest->status !== 'submitted') {
             throw ValidationException::withMessages(['workflow' => 'Only submitted properties can be reviewed.']);
         }
@@ -108,11 +110,11 @@ final class PropertyWorkflowController extends Controller
     public function decide(ApprovePropertyRequest $request, Property $property): JsonResponse
     {
         $this->authorizePermission($request, 'properties.workflow.approve');
-        $latestVerification = $property->verifications()->where('stage', 'verification')->latest('id')->first();
+        $latestVerification = $this->latestRecord($property, 'verification');
         if (!$latestVerification || $latestVerification->status !== 'verified') {
             throw ValidationException::withMessages(['workflow' => 'A property must be verified before manager approval.']);
         }
-        $latestApproval = $property->verifications()->where('stage', 'approval')->latest('id')->first();
+        $latestApproval = $this->latestRecord($property, 'approval');
         if ($latestApproval?->status === 'approved') {
             throw ValidationException::withMessages(['workflow' => 'This property is already approved.']);
         }
@@ -127,6 +129,15 @@ final class PropertyWorkflowController extends Controller
     private function authorizePermission(Request $request, string $permission): void
     {
         abort_unless($request->user()?->can($permission), 403, 'You are not authorized to perform this workflow action.');
+    }
+
+    private function latestRecord(Property $property, string $stage): ?PropertyVerification
+    {
+        return $property->verifications()
+            ->reorder()                 // clears the relationship's built-in orderBy('id')
+            ->where('stage', $stage)
+            ->orderByDesc('id')
+            ->first();
     }
 
     /** @return array<string, mixed> */

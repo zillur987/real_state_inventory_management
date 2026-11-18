@@ -15,7 +15,9 @@ final class OwnerResource extends JsonResource
         $hasApprovedRequest = $userId && $this->resource->relationLoaded('contactRequests')
             ? $this->contactRequests->contains(fn ($item) => (int) $item->requested_by === (int) $userId && $item->status === 'approved')
             : false;
-        $canViewContact = ($request->user()?->can('owners.view_contact') ?? false) || $hasApprovedRequest;
+        $canViewContact = ($request->user()?->can('owners.view_contact') ?? false)
+            || ($request->user()?->can('owners.update') ?? false)
+            || $hasApprovedRequest;
         $canViewFinalPrice = $request->user()?->can('owners.view_final_price') ?? false;
 
         return [
@@ -31,6 +33,8 @@ final class OwnerResource extends JsonResource
             'legal_status_note' => $this->when($canViewContact, $this->legal_status_note),
             'expected_price' => $this->when($canViewContact, $this->expected_price),
             'final_negotiated_price' => $this->when($canViewFinalPrice, $this->final_negotiated_price),
+            'relationship_manager_id' => $this->when($canViewContact, $this->relationship_manager_id),
+            'notes' => $this->when($canViewContact, $this->notes),
             'relationship_manager' => $this->when($canViewContact, $this->whenLoaded('relationshipManager', fn () => $this->relationshipManager ? [
                 'id' => $this->relationshipManager->id,
                 'name' => $this->relationshipManager->name,
