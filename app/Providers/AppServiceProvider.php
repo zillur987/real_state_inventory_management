@@ -69,5 +69,34 @@ class AppServiceProvider extends ServiceProvider
                 UserRole::Manager,
             )
         );
+
+        Gate::define('clients.view', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager, UserRole::SalesAgent)
+        );
+
+        Gate::define('clients.create', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager, UserRole::SalesAgent)
+        );
+
+        Gate::define('clients.update', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager, UserRole::SalesAgent)
+        );
+
+        Gate::define('clients.match', static fn (User $user): bool =>
+            $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager, UserRole::SalesAgent)
+        );
+
+        Gate::define('automation.view', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
+        Gate::define('automation.maps', static fn (User $user): bool =>
+            $user->is_active &&
+            $user->hasRole(
+                UserRole::Admin,
+                UserRole::Manager,
+                UserRole::SalesAgent
+            )
+        );
+        Gate::define('automation.duplicates', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
+        Gate::define('automation.price-history', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
+        Gate::define('automation.manage', static fn (User $user): bool => $user->is_active && $user->hasRole(UserRole::Admin, UserRole::Manager));
     }
 }

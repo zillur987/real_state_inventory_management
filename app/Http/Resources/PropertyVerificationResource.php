@@ -20,10 +20,10 @@ final class PropertyVerificationResource extends JsonResource
             'checklist' => $this->checklist ?? [],
             'notes' => $this->notes,
             'acted_at' => $this->acted_at,
-            'actor' => $this->whenLoaded('actor', fn () => [
+            'actor' => $this->whenLoaded('actor', fn () => $this->actor ? [
                 'id' => $this->actor->id,
                 'name' => $this->actor->name,
-            ]),
+            ] : null),
         ];
     }
 }

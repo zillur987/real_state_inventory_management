@@ -42,12 +42,32 @@ final class PropertyWorkflowController extends Controller
     public function show(Request $request, Property $property): JsonResponse
     {
         $this->authorizePermission($request, 'properties.workflow.view');
-        $history = $property->verifications()->with('actor')->orderBy('id')->get();
+
+        $history = $property->verifications()
+            ->with('actor')
+            ->orderBy('id')
+            ->get();
+
+        $latestVerification = $history
+            ->where('stage', 'verification')
+            ->last();
+
+        $latestApproval = $history
+            ->where('stage', 'approval')
+            ->last();
+
         return response()->json([
             'data' => $this->propertySummary($property),
+
             'history' => PropertyVerificationResource::collection($history),
-            'latest_verification' => new PropertyVerificationResource($history->where('stage', 'verification')->last()),
-            'latest_approval' => new PropertyVerificationResource($history->where('stage', 'approval')->last()),
+
+            'latest_verification' => $latestVerification
+                ? (new PropertyVerificationResource($latestVerification))->resolve()
+                : null,
+
+            'latest_approval' => $latestApproval
+                ? (new PropertyVerificationResource($latestApproval))->resolve()
+                : null,
         ]);
     }
 

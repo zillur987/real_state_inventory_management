@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\Repositories\PropertyRepositoryInterface;
+use App\Contracts\Repositories\PropertySearchRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Contracts\Services\AuthServiceInterface;
+use App\Contracts\Services\PropertySearchServiceInterface;
 use App\Contracts\Services\PropertyServiceInterface;
 use App\Repositories\PropertyRepository;
+use App\Repositories\PropertySearchRepository;
 use App\Repositories\UserRepository;
 use App\Services\Auth\AuthService;
+use App\Services\Property\PropertySearchService;
 use App\Services\Property\PropertyService;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,5 +30,7 @@ final class RepositoryServiceProvider extends ServiceProvider
         AuthServiceInterface::class => AuthService::class,
         PropertyRepositoryInterface::class => PropertyRepository::class,
         PropertyServiceInterface::class => PropertyService::class,
+        PropertySearchRepositoryInterface::class => PropertySearchRepository::class,
+        PropertySearchServiceInterface::class => PropertySearchService::class,
     ];
 }

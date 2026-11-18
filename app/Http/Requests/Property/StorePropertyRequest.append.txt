@@ -1,0 +1,2 @@
+// Add this validation rule to the existing StorePropertyRequest::rules() array:
+'is_owner_direct' => ['sometimes', 'boolean'],

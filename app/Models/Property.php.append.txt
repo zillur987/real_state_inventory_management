@@ -1,0 +1,6 @@
+// Merge these additions into the existing Property model.
+// Add `is_owner_direct` to the existing $fillable array:
+'is_owner_direct',
+
+// Add this entry to the existing casts() array:
+'is_owner_direct' => 'boolean',

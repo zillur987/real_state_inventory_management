@@ -16,9 +16,9 @@ final class PropertyService implements PropertyServiceInterface
     {
     }
 
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $this->properties->paginateLatest(min(max($perPage, 1), 100));
+        return $this->properties->paginateFiltered($filters, min(max($perPage, 1), 100));
     }
 
     public function create(array $attributes): Property

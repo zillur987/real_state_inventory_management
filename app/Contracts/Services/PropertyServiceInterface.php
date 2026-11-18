@@ -9,7 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface PropertyServiceInterface
 {
-    public function paginate(int $perPage = 15): LengthAwarePaginator;
+    public function paginate(array $perPage): LengthAwarePaginator;
 
     /** @param array<string, mixed> $attributes */
     public function create(array $attributes): Property;

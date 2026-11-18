@@ -20,7 +20,11 @@ final class PropertyController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $properties = $this->propertyService->paginate((int) $request->integer('per_page', 15));
+        $filters = $request->only([
+            'search', 'category', 'inventory_status', 'legal_verification', 'sort_by', 'sort_dir',
+        ]);
+
+        $properties = $this->propertyService->paginate($filters, (int) $request->integer('per_page', 15));
 
         return PropertyResource::collection($properties);
     }
@@ -28,20 +32,19 @@ final class PropertyController extends Controller
     public function store(StorePropertyRequest $request): JsonResponse
     {
         $property = $this->propertyService->create($request->validated());
-        $property->load('images');
 
         return (new PropertyResource($property))->response()->setStatusCode(201);
     }
 
     public function show(string $property): PropertyResource
     {
-        return new PropertyResource($this->propertyService->find($property)->load('images'));
+        return new PropertyResource($this->propertyService->find($property));
     }
 
     public function update(StorePropertyRequest $request, string $property): PropertyResource
     {
         $updated = $this->propertyService->update($property, $request->validated());
 
-        return new PropertyResource($updated->load('images'));
+        return new PropertyResource($updated);
     }
 }

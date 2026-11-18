@@ -56,6 +56,33 @@ const router = createRouter({
             component: () => import('@/pages/ManagementDashboardPage.vue'),
             meta: { requiresAuth: true },
         },
+
+        {
+            path: '/clients/matching',
+            name: 'clients.matching',
+            component: () => import('@/pages/ClientMatchingPage.vue'),
+            meta: { requiresAuth: true },
+        },
+
+        {
+            path: '/automation/property-intelligence',
+            name: 'automation.property-intelligence',
+            component: () => import('@/pages/PropertyAutomationPage.vue'),
+            meta: { requiresAuth: true, permission: 'automation.view' },
+        },
+
+        {
+            path: '/properties/search',
+            name: 'properties.search',
+            component: () => import('@/pages/PropertySearchPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/properties/:property',
+            name: 'properties.show',
+            component: () => import('@/pages/PropertyDetailPage.vue'),
+            meta: { requiresAuth: true },
+        },
         { path: '/:pathMatch(.*)*', redirect: { name: 'dashboard' } },
     ],
 });

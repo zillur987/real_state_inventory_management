@@ -1,0 +1,3 @@
+// Merge into the existing PropertyResource::toArray() array:
+'is_owner_direct' => (bool) $this->is_owner_direct,
+// This is a non-confidential inventory flag; do not add owner name/phone fields.

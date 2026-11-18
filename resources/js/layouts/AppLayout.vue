@@ -27,7 +27,8 @@ async function logout() {
                         class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-slate-600 hover:bg-slate-100"
                         @click="logout"
                     >
-                        <LogOut class="size-4" /> Logout
+                        <LogOut class="size-4 cursor-pointer" />
+                        <span class="cursor-pointer">Logout</span>
                     </button>
                 </div>
             </div>
