@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Automation\PropertyAutomationController;
 use App\Http\Controllers\Api\V1\Clients\ClientMatchingController;
 use App\Http\Controllers\Api\V1\Dashboard\ManagementDashboardController;
+use App\Http\Controllers\Api\V1\Owner\OwnerContactRequestController;
+use App\Http\Controllers\Api\V1\Owner\OwnerController;
 use App\Http\Controllers\Api\V1\Property\OwnerContactAccessRequestController;
 use App\Http\Controllers\Api\V1\Property\PropertyController;
 use App\Http\Controllers\Api\V1\Property\PropertyImageController;
@@ -69,6 +71,13 @@ Route::prefix('v1')->group(function (): void {
             'properties/{property}/owner-contact-requests',
             [OwnerContactAccessRequestController::class, 'store']
         );
+
+        Route::apiResource('owners', OwnerController::class)
+        ->only(['index', 'store', 'show', 'update', 'destroy']);
+
+        Route::post('owners/{owner}/contact-requests', [OwnerContactRequestController::class, 'store']);
+        Route::get('owner-contact-requests', [OwnerContactRequestController::class, 'index']);
+        Route::patch('owner-contact-requests/{contactRequest}/review', [OwnerContactRequestController::class, 'review']);
     });
 
 });

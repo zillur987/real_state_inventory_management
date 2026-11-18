@@ -1,0 +1,9 @@
+// Add a module/navigation entry to your existing modules configuration.
+// Adapt the object shape to the existing config:
+{
+    key: 'owners',
+    label: 'Owner Management',
+    icon: 'users',
+    route: 'owners.index',
+    permission: 'owners.view',
+},

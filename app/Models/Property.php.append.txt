@@ -1,6 +1,8 @@
-// Merge these additions into the existing Property model.
-// Add `is_owner_direct` to the existing $fillable array:
-'is_owner_direct',
+// Add this relationship to the existing App\Models\Property class:
+public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+{
+    return $this->belongsTo(\App\Models\Owner::class);
+}
 
-// Add this entry to the existing casts() array:
-'is_owner_direct' => 'boolean',
+// Add 'owner_id' to $fillable only if your property workflow assigns owners
+// through mass assignment. Never expose owner_id or owner details in public/client resources.

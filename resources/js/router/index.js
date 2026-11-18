@@ -83,6 +83,37 @@ const router = createRouter({
             component: () => import('@/pages/PropertyDetailPage.vue'),
             meta: { requiresAuth: true },
         },
+
+        {
+            path: '/owners',
+            name: 'owners.index',
+            component: () => import('@/pages/owners/OwnerIndexPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/owners/create',
+            name: 'owners.create',
+            component: () => import('@/pages/owners/OwnerFormPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/owners/:owner/edit',
+            name: 'owners.edit',
+            component: () => import('@/pages/owners/OwnerFormPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/owners/:owner',
+            name: 'owners.show',
+            component: () => import('@/pages/owners/OwnerShowPage.vue'),
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/owner-contact-requests',
+            name: 'owners.contact-requests',
+            component: () => import('@/pages/owners/OwnerContactRequestsPage.vue'),
+            meta: { requiresAuth: true },
+        },
         { path: '/:pathMatch(.*)*', redirect: { name: 'dashboard' } },
     ],
 });
